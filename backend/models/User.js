@@ -12,10 +12,13 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 8,
     },
-    email: {
+
+    isMFAactive: {
+      type: Boolean,
+      required: false,
+    },
+    twoFactorSecret: {
       type: String,
-      required: true,
-      unique: true,
     },
   },
   { timestamps: true }
