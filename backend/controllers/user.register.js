@@ -1,8 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 
-import jwt from "jsonwebtoken";
-
 export const register = async (req, res) => {
   try {
     //extracting the username and password from the request body
@@ -34,3 +32,8 @@ export const register = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+export const login=async(req,res)=>{
+  
+}
