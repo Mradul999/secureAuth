@@ -33,7 +33,15 @@ export const register = async (req, res) => {
   }
 };
 
-
-export const login=async(req,res)=>{
-  
-}
+export const login = async (req, res) => {
+  try {
+    console.log("The authenticated user  is ", req.user);
+    res.status(200).json({
+      message: "user login successfully",
+      username: req.user.username,
+      isMFAactive: req.user.isMFAactive,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};

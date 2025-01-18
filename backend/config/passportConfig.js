@@ -1,29 +1,46 @@
 import passport from "passport";
-
 import { Strategy as LocalStrategy } from "passport-local";
-
 import bcrypt from "bcryptjs";
-
 import User from "../models/User.js";
 
+// Define local strategy
 passport.use(
-  new LocalStrategy(function (username, password, done) {
+  new LocalStrategy(async (username, password, done) => {
     try {
-        
+      // Find user by username
+      const user = await User.findOne({ username });
+      if (!user) return done(null, false, { message: "User not found" });
+
+      // Compare provided password with stored hashed password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) return done(null, user); // Success
+      else return done(null, false, { message: "Incorrect credentials" }); // Password mismatch
     } catch (error) {
-        
+      return done(error); 
     }
-    User.findOne({ username: username }, function (err, user) {
-      if (err) {
-        return done(err);
-      }
-      if (!user) {
-        return done(null, false);
-      }
-      if (!user.verifyPassword(password)) {
-        return done(null, false);
-      }
-      return done(null, user);
-    });
   })
 );
+
+
+//what is serializing and deserializing user in passport.js?
+
+//basically the process of storing user information  into the session after  a successfull login is known as serialization
+
+//and the process of fetching user details based on the information stored in the session is known as deserialization 
+
+
+
+
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+
+passport.deserializeUser(async (_id, done) => {
+  try {
+    const user = await User.findById(_id);
+    done(null, user); 
+  } catch (error) {
+    done(error); 
+  }
+});
