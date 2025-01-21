@@ -3,8 +3,12 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 
-//bcrypt is a librarry used to hash password ie making it secure before storing in the database
+//what is passport.js
 
+//Passport.js is a Node.js library for authentication. It simplifies the process
+// of integrating various authentication strategies 
+//(e.g., username/password, OAuth, social logins like Google, Facebook, GitHub) into your application
+//bcrypt is a librarry used to hash password ie making it secure before storing in the database
 // Define local strategy
 passport.use(
   new LocalStrategy(async (username, password, done) => {
