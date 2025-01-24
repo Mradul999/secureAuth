@@ -35,6 +35,16 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    const { username, password } = req.body;
+
+    const existingUser = await User.findOne({ username });
+    if (!existingUser)
+      return res.status(404).json({ message: "User not registered yet" });
+
+    const isMatch = await bcrypt.compare(password, existingUser.password);
+    if (!isMatch)
+      return res.status(400).json({ message: "Incorrect credentials" });
+
     console.log("The authenticated user  is ", req.user);
     res.status(200).json({
       message: "user login successfully",

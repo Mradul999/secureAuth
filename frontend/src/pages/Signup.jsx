@@ -13,30 +13,27 @@ export default function Signup() {
     navigate("/");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    axios
-      .post("localhost:7000/api/auth/register", {
+    if (!username || !password) {
+      alert("Fill both username and password");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/auth/register", {
         username,
         password,
-      })
-      .then((response) => {
-        console.log(response);
-        const result = response.data.message;
-        console.log(result);
-
-        if (result === "User created successfully") {
-          alert("Success");
-          navigate("/dashboard");
-        } else {
-          alert("Success :" + result);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        alert("Error: " + error.message);
       });
+
+      if (response.status === 200) {
+        alert("User created successfully");
+        navigate("/login");
+      }
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (
@@ -69,18 +66,7 @@ export default function Signup() {
               required
             />
           </div>
-          <div className="flex items-center justify-between">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-              />
-              <span className="text-gray-600 text-sm">Remember me</span>
-            </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
-              Forgot password?
-            </a>
-          </div>
+
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
