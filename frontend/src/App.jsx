@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import TwoFA from "./pages/TwoFA.jsx";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
               </ProtectedRoute>
             }
           ></Route>
+          <Route path="/2fa" element={<TwoFA />}></Route>
           <Route path="/dashboard" element={<Dashboard />}></Route>
         </Routes>
       </BrowserRouter>

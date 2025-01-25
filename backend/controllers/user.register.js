@@ -50,6 +50,7 @@ export const login = async (req, res) => {
       message: "user login successfully",
       username: req.user.username,
       isMFAactive: req.user.isMFAactive,
+      existingUser,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
