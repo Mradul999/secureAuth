@@ -1,11 +1,20 @@
 import { Router } from "express";
-import { login, register } from "../controllers/user.register.js";
+import {
+  getStatus,
+  login,
+  logout,
+  register,
+} from "../controllers/user.register.js";
 import passport from "passport";
 
 const router = Router();
 
 router.post("/register", register);
-//using passport middleware 
+//using passport middleware
 router.post("/login", passport.authenticate("local"), login);
+
+router.get("/status", getStatus);
+
+router.post("/logout", logout);
 
 export default router;

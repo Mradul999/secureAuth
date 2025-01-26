@@ -34,25 +34,40 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+  console.log("Authenticated user:", req.user);
+  res.status(200).json({
+    message: "User login successfully",
+    username: req.user.username,
+    isMFAactive: req.user.isMFAactive,
+  });
+};
+
+export const getStatus = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    console.log(req.user);
 
-    const existingUser = await User.findOne({ username });
-    if (!existingUser)
-      return res.status(404).json({ message: "User not registered yet" });
-
-    const isMatch = await bcrypt.compare(password, existingUser.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Incorrect credentials" });
-
-    console.log("The authenticated user  is ", req.user);
-    res.status(200).json({
-      message: "user login successfully",
-      username: req.user.username,
-      isMFAactive: req.user.isMFAactive,
-      existingUser,
-    });
+    if (req.user) {
+      return res.status(200).json({
+        message: "User is logged in",
+        username: req.user.username,
+        isMFAactive: req.user.isMFAactive,
+      });
+    } else {
+      console.error("Unauthorized access attempt - No user in request");
+      return res.status(401).json({ message: "Unauthorized user" });
+    }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    console.error("An error occurred in getStatus controller:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
+};
+
+export const logout = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "unauthorized user" });
+  }
+  req.logout((err) => {
+    if (err) return res.status(400).json({ message: "user not logged in" });
+    res.status(200).json({ message: "User logged out successfully" });
+  });
 };
