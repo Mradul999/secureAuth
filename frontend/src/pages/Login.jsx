@@ -23,7 +23,7 @@ const Login = () => {
       });
 
       if (response.status === 200) {
-        console.log(response.data);
+        // console.log(response.data);
 
         sessionStorage.setItem("user", response.data.user);
         alert("Login successful!");
@@ -65,7 +65,7 @@ const Login = () => {
 
           <div className="relative">
             <input
-              type={showPassword ? "text" : "password"} // Toggle between text and password
+              type={showPassword ? "text" : "password"} 
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -75,7 +75,7 @@ const Login = () => {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)} // Toggle showPassword state
+              onClick={() => setShowPassword(!showPassword)} 
               className="absolute right-2 top-2 text-sm text-blue-600 hover:underline focus:outline-none"
             >
               {showPassword ? "Hide" : "Show"}

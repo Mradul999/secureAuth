@@ -89,3 +89,9 @@ export const logout = async (req, res) => {
     res.status(200).json({ message: "User logged out successfully" });
   });
 };
+
+export const setup2fa = async (req, res) => {};
+
+export const verify2fa = async (req, res) => {};
+
+export const reset2fa = async (req, res) => {};
