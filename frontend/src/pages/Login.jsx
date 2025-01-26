@@ -5,6 +5,7 @@ import axios from "axios";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,14 +25,22 @@ const Login = () => {
       if (response.status === 200) {
         console.log(response.data);
 
-        sessionStorage.setItem("user", response.data.existingUser);
+        sessionStorage.setItem("user", response.data.user);
         alert("Login successful!");
 
         // Navigate to the dashboard or home page
         navigate("/2fa");
       }
     } catch (error) {
-      alert("Login failed. Check your credentials.");
+      if (error.response) {
+        if (error.response.status === 404) {
+          alert("User not registered ");
+        } else if (error.response.status === 401) {
+          alert("Invalid credentials");
+        } else {
+          alert("An error occurred while trying to login.");
+        }
+      }
     }
   };
 
@@ -56,7 +65,7 @@ const Login = () => {
 
           <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"} // Toggle between text and password
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -64,6 +73,13 @@ const Login = () => {
               placeholder="Password"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)} // Toggle showPassword state
+              className="absolute right-2 top-2 text-sm text-blue-600 hover:underline focus:outline-none"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
           </div>
 
           <button

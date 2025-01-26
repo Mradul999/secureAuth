@@ -1,11 +1,24 @@
-import React from 'react';
+import React from "react";
+
+
+
+import { useNavigate } from "react-router-dom";
 
 const Nav = () => {
-  const user = localStorage.getItem('user');
+  const user = sessionStorage.getItem("user");
+
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    window.location.reload();
+    sessionStorage.removeItem("user");
+
+    navigate("/");
+
+    try {
+      
+    } catch (error) {
+      
+    }
   };
 
   return (
@@ -21,7 +34,7 @@ const Nav = () => {
           </button>
         ) : (
           <button
-            onClick={() => (window.location.href = '/login')}
+            onClick={() => navigate("/login")}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
           >
             Login

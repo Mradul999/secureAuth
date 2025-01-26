@@ -5,6 +5,7 @@ import axios from "axios";
 export default function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -29,11 +30,16 @@ export default function Signup() {
 
       if (response.status === 200) {
         alert("User created successfully");
-        
         navigate("/login");
       }
     } catch (error) {
-      alert(error);
+      if (error.response) {
+        if (error.response.status === 400) {
+          alert(error.response.data.message);
+        } else {
+          alert("An error occurred please try again later");
+        }
+      }
     }
   };
 
@@ -58,7 +64,7 @@ export default function Signup() {
 
           <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -66,6 +72,13 @@ export default function Signup() {
               placeholder="Password"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-blue-600"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
           </div>
 
           <button
