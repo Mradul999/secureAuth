@@ -1,7 +1,12 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import speakeasy from "speakeasy";
+import jwt from "jsonwebtoken";
 import qrcode from "qrcode";
+
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const register = async (req, res) => {
   try {
@@ -119,7 +124,8 @@ export const setup2fa = async (req, res) => {
       issuer: "secureAuth.com",
       encoding: "base32",
     });
-
+    //this will geneate a image url for the qrcode  .we can use base64 string to image converter to see the generated qr
+    // and the use extention like authenticator to scan that ar and geneate time based otp
     const qrImageURL = await qrcode.toDataURL(url);
 
     res.status(200).json({
@@ -131,7 +137,40 @@ export const setup2fa = async (req, res) => {
     return res.status(500).json({ message: "Error setting up 2fa " });
   }
 };
+// here we will verify the genetated otp
+export const verify2fa = async (req, res) => {
+  const { token } = req.body;
+  const user = req.user;
+  //here we are veirfying the token coming from the body with the secret stored in the databse
+  const verified = speakeasy.totp.verify({
+    secret: user.twoFactorSecret,
+    encoding: "base32",
+    token,
+  });
+  //if verification done successfully we will assgin the user a jwt
+  //  which will be used further for accessing the routes
+  // also an expiry time for the token
+  if (verified) {
+    const jwttoken = jwt.sign(
+      { username: user.username },
+      process.env.jwt_secret,
+      { expiresIn: "1hr" }
+    );
+    res.status(200).json({ message: "2fa successfull", token: jwttoken });
+  } else {
+    res.status(400).json({ message: "Invalid 2fa token" });
+  }
+};
 
-export const verify2fa = async (req, res) => {};
+export const reset2fa = async (req, res) => {
+  try {
+    const user = req.user;
 
-export const reset2fa = async (req, res) => {};
+    user.twoFactorSecret = "";
+    user.isMFAactive = false;
+    await user.save();
+    res.status(200).json({ message: "2fa reset successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error occurred in resetting 2fa" });
+  }
+};
