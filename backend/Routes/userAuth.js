@@ -9,6 +9,7 @@ import {
   verify2fa,
 } from "../controllers/user.register.js";
 import passport from "passport";
+import { routeProtection } from "../middlewares/routeProtection.js";
 
 const router = Router();
 
@@ -23,15 +24,8 @@ router.post("/logout", logout);
 // we are using a middleware to protect the 2fa routes because
 //  it is accessible only when the user has completed the 1factor authentication
 //  before going for the 2fa
-router.post(
-  "/2fa/setup",
-  (req, res, next) => {
-    if (req.isAuthenticated()) return next;
-    return res.status(401).json({ message: "user not authenticated" });
-  },
-  setup2fa
-);
-router.post("/2fa/verify", verify2fa);
-router.post("/2fa/reset", reset2fa);
+router.post("/2fa/setup", routeProtection, setup2fa);
+router.post("/2fa/verify", routeProtection, verify2fa);
+router.post("/2fa/reset", routeProtection, reset2fa);
 
 export default router;

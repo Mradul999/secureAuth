@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import speakeasy from "speakeasy";
+import qrcode from "qrcode";
 
 export const register = async (req, res) => {
   try {
@@ -90,7 +92,45 @@ export const logout = async (req, res) => {
   });
 };
 
-export const setup2fa = async (req, res) => {};
+// What is Speakeasy?
+// Speakeasy is a Node.js library used for implementing Two-Factor Authentication (2FA)
+//  and One-Time Passwords (OTP) in your application.
+
+export const setup2fa = async (req, res) => {
+  try {
+    console.log("the requested user is :", req.user);
+    const user = req.user;
+
+    //generating a secret using speakeasy
+    var secret = speakeasy.generateSecret();
+
+    console.log(secret);
+    // storing the secret in the database for later use
+    user.twoFactorSecret = secret.base32;
+    user.isMFAactive = true;
+    //saving changes in the database
+    await user.save();
+
+    //now we use qrcode npm library to generate a 2d barcode
+
+    const url = speakeasy.otpauthURL({
+      secret: secret.base32,
+      label: `${req.user.username}`,
+      issuer: "secureAuth.com",
+      encoding: "base32",
+    });
+
+    const qrImageURL = await qrcode.toDataURL(url);
+
+    res.status(200).json({
+      message: "secret generated successfully ",
+      secret: secret.base32,
+      qrcode: qrImageURL,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Error setting up 2fa " });
+  }
+};
 
 export const verify2fa = async (req, res) => {};
 

@@ -7,7 +7,6 @@ import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import TwoFA from "./pages/TwoFA.jsx";
-
 import Nav from "./components/Nav.jsx";
 
 const App = () => {
