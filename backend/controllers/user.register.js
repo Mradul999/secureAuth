@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import speakeasy from "speakeasy";
 import jwt from "jsonwebtoken";
 import qrcode from "qrcode";
-
 import dotenv from "dotenv";
 
 dotenv.config();
