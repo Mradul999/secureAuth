@@ -112,7 +112,7 @@ export const setup2fa = async (req, res) => {
     console.log(secret);
     // storing the secret in the database for later use
     user.twoFactorSecret = secret.base32;
-    user.isMFAactive = true;
+
     //saving changes in the database
     await user.save();
 
@@ -151,11 +151,14 @@ export const verify2fa = async (req, res) => {
   //  which will be used further for accessing the routes
   // also an expiry time for the token
   if (verified) {
+    user.isMFAactive = true;
     const jwttoken = jwt.sign(
       { username: user.username },
       process.env.jwt_secret,
       { expiresIn: "1hr" }
     );
+    await user.save();
+
     res.status(200).json({ message: "2fa successfull", token: jwttoken });
   } else {
     res.status(400).json({ message: "Invalid 2fa token" });
