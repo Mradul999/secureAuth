@@ -16,7 +16,9 @@ const TwoFA = () => {
 
   const checkStatus = async () => {
     try {
-      const response = await axios.get("/api/auth/status");
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/auth/status`
+      );
       setStatus(response.data);
     } catch (error) {
       console.error("Error checking status:", error);
@@ -25,7 +27,9 @@ const TwoFA = () => {
 
   const setup2FA = async () => {
     try {
-      const response = await axios.post("/api/auth/2fa/setup");
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/2fa/setup`
+      );
       setQrCode(response.data.qrcode);
       setMessage("Scan the QR code with your authenticator app");
     } catch (error) {
@@ -36,7 +40,10 @@ const TwoFA = () => {
 
   const verify2FA = async () => {
     try {
-      const response = await axios.post("/api/auth/2fa/verify", { token });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/2fa/verify`,
+        { token }
+      );
       setMessage(response.data.message);
       navigate("/success");
     } catch (error) {
@@ -47,7 +54,7 @@ const TwoFA = () => {
 
   const reset2FA = async () => {
     try {
-      await axios.post("/api/auth/2fa/reset");
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/2fa/reset`);
       setStatus(null);
       setQrCode("");
       setMessage("2FA reset successfully");

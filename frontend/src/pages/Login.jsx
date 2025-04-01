@@ -17,10 +17,13 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("/api/auth/login", {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        {
+          username,
+          password,
+        }
+      );
 
       if (response.status === 200) {
         sessionStorage.setItem("user", response.data.user);
