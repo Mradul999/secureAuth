@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Login = () => {
+const Signup = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,19 +16,19 @@ const Login = () => {
     }
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/api/auth/register`,
         { username, password }
       );
       if (response.status === 200) {
-        sessionStorage.setItem("user", response.data.user);
-        alert("Login successful!");
-        navigate("/");
+        // sessionStorage.setItem("user", response.data.user);
+        alert("Signup successful!");
+        navigate("/login");
       }
     } catch (error) {
       if (error.response) {
-        if (error.response.status === 404) alert("User not registered");
-        else if (error.response.status === 401) alert("Invalid credentials");
-        else alert("An error occurred while trying to login.");
+        if (error.response.status === 400) {
+          alert("user with this username already exists");
+        } else alert("An error occurred while trying to signup.");
       }
     }
   };
@@ -36,7 +36,7 @@ const Login = () => {
   return (
     <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
       <div className="w-full max-w-md bg-gray-800 bg-opacity-80 backdrop-blur-md rounded-xl shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-center text-blue-400">Login</h2>
+        <h2 className="text-3xl font-bold text-center text-blue-400">Signup</h2>
         <form className="space-y-6 mt-6" onSubmit={handleSubmit}>
           <div className="relative">
             <input
@@ -71,19 +71,19 @@ const Login = () => {
             type="submit"
             className="w-full bg-blue-600 py-2 rounded-lg hover:bg-blue-500 transition duration-200"
           >
-            Login
+            Signup
           </button>
           <p className="text-center text-gray-400">
-            Don't have an account?{" "}
+            Alrady have an account?{" "}
             <a
-              href="/signup"
+              href="/login"
               onClick={(e) => {
                 e.preventDefault();
-                navigate("/signup");
+                navigate("/login");
               }}
               className="text-blue-400 hover:underline"
             >
-              Sign Up
+              Login
             </a>
           </p>
         </form>
@@ -92,4 +92,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
