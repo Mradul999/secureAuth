@@ -25,7 +25,10 @@ app.use(express.json());
 //this middleware is used to configure Cross-Origin Resource Sharing (CORS) in your Express application.like our backend is running on differnt port and frontend on different to share resources between them we use cors
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://secure-auth-project.vercel.app/",
+    ],
     credentials: true,
   })
 );
