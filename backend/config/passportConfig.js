@@ -17,14 +17,14 @@ passport.use(
     try {
       // Find user by username
       const user = await User.findOne({ username });
-      if (!user) return done(null, false, { message: "User not found" });
+      if (!user) return done(null, false);
 
       // Compare provided password with stored hashed password
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) return done(null, user); // Success
-      else return done(null, false, { message: "Incorrect credentials" }); // Password mismatch
+      else return done(null, false); // Password mismatch
     } catch (error) {
-      return done(error);
+      return done(error, false);
     }
   })
 );
@@ -42,6 +42,6 @@ passport.deserializeUser(async (_id, done) => {
     const user = await User.findById(_id);
     done(null, user);
   } catch (error) {
-    done(error);
+    done(error, false);
   }
 });

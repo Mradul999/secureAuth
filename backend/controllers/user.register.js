@@ -42,45 +42,30 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   console.log("Authenticated user:", req.user);
-
-  try {
-    const { username, password } = req.body;
-
-    const user = await User.findOne({ username });
-    if (!user) {
-      return response.status(404).json({ message: "User not registered " });
-    }
-
-    const isMatch = bcrypt.compare(req.user.password, password);
-    if (!isMatch) {
-      return response.status(401).json({ message: "Invalid credentials" });
-    }
-
-    res.status(200).json({
-      message: "User login successfully",
-      username: req.user.username,
-      isMFAactive: req.user.isMFAactive,
-      user: req.user,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
+  res.status(200).json({
+    message: "user logged in successfully",
+    username: req.user.username,
+    isMFAactive: req.user.isMFAactive,
+  });
 };
 
 export const getStatus = async (req, res) => {
   try {
-    console.log(req.user);
+    // console.log("JWT decoded data=>", req.user);
+    const { username } = req.body;
 
-    if (req.user) {
-      return res.status(200).json({
-        message: "User is logged in",
-        username: req.user.username,
-        isMFAactive: req.user.isMFAactive,
-      });
-    } else {
-      console.error("Unauthorized access attempt - No user in request");
-      return res.status(401).json({ message: "Unauthorized user" });
+    // Get user from database using username from JWT
+    const user = await User.findOne({ username: req.user.username });
+    if (!user) {
+      console.error("User not found in database");
+      return res.status(401).json({ message: "User not found" });
     }
+
+    return res.status(200).json({
+      message: "User is logged in",
+      username: user.username,
+      isMFAactive: user.isMFAactive,
+    });
   } catch (error) {
     console.error("An error occurred in getStatus controller:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });

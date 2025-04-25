@@ -8,6 +8,8 @@ const TwoFA = () => {
   const [token, setToken] = useState("");
   const [message, setMessage] = useState("");
 
+  const user = sessionStorage.getItem("user");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +19,8 @@ const TwoFA = () => {
   const checkStatus = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/auth/status`
+        `${import.meta.env.VITE_API_URL}/api/auth/status`,
+        { withCredentials: true }
       );
       setStatus(response.data);
     } catch (error) {

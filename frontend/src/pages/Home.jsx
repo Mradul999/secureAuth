@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"
 
 const Home = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    checkStatus();
+  }, []);
+  const checkStatus = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/auth/status`,
+        { withCredentials: true }
+      );
+      setStatus(response.data);
+    } catch (error) {
+      console.error("Error checking status:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white px-6">

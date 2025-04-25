@@ -22,6 +22,7 @@ const Login = () => {
         {
           username,
           password,
+          withCredentials: true,
         }
       );
 
