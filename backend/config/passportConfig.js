@@ -6,7 +6,7 @@ import User from "../models/User.js";
 //what is passport.js
 
 //Passport.js is a Node.js library for authentication. It simplifies the process
-// of integrating various authentication strategies
+// of integrating various authentication strategies 
 //(e.g., username/password, OAuth, social logins like Google, Facebook, GitHub) into your application
 //bcrypt is a librarry used to hash password ie making it secure before storing in the database
 // Define local strategy
@@ -17,17 +17,19 @@ passport.use(
     try {
       // Find user by username
       const user = await User.findOne({ username });
-      if (!user) return done(null, false);
+      if (!user) return done(null, false, { message: "User not found" });
 
       // Compare provided password with stored hashed password
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) return done(null, user); // Success
-      else return done(null, false); // Password mismatch
+      else return done(null, false, { message: "Incorrect credentials" }); // Password mismatch
     } catch (error) {
-      return done(error, false);
+      return done(error);
     }
   })
 );
+
+//what is serializing and deserializing user in passport.js?
 
 //basically the process of storing user information  into the session after  a successfull login is known as serialization
 
@@ -42,6 +44,6 @@ passport.deserializeUser(async (_id, done) => {
     const user = await User.findById(_id);
     done(null, user);
   } catch (error) {
-    done(error, false);
+    done(error);
   }
 });

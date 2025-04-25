@@ -1,151 +1,142 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const TwoFA = () => {
-  const [status, setStatus] = useState(null);
+  const [isMFAactive, setIsMFAactive] = useState(false);
   const [qrCode, setQrCode] = useState("");
-  const [token, setToken] = useState("");
-  const [message, setMessage] = useState("");
+  const [code, setCode] = useState("");
+  console.log(code);
 
-  const user = sessionStorage.getItem("user");
-
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  const fetchStatus = async () => {
+    try {
+      const res = await axios.get(`http://localhost:7000/api/auth/status`, {
+        withCredentials: true,
+      });
+      setIsMFAactive(res.data.isMFAactive);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    checkStatus();
+    fetchStatus();
   }, []);
 
-  const checkStatus = async () => {
+  const handleEnable2FA = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/auth/status`,
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/setup2fa`,
+        {},
         { withCredentials: true }
       );
-      setStatus(response.data);
-    } catch (error) {
-      console.error("Error checking status:", error);
+      setQrCode(res.data.qrcode);
+      setError("");
+      setSuccess("");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to set up 2FA");
     }
   };
 
-  const setup2FA = async () => {
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/2fa/setup`
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/verify2fa`,
+        { code },
+        { withCredentials: true }
       );
-      setQrCode(response.data.qrcode);
-      setMessage("Scan the QR code with your authenticator app");
-    } catch (error) {
-      console.error("Error setting up 2FA:", error);
-      setMessage("Error setting up 2FA");
+      if (res.data.success) {
+        setSuccess("2FA successfully enabled!");
+        setIsMFAactive(true);
+        setQrCode("");
+        setCode("");
+        setError("");
+      } else {
+        setError("Invalid code");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Verification failed");
     }
   };
 
-  const verify2FA = async () => {
+  const handleReset2FA = async () => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/2fa/verify`,
-        { token }
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/reset2fa`,
+        { withCredentials: true }
       );
-      setMessage(response.data.message);
-      navigate("/success");
-    } catch (error) {
-      console.error("Error verifying 2FA:", error);
-      setMessage("Invalid 2FA token");
-    }
-  };
-
-  const reset2FA = async () => {
-    try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/2fa/reset`);
-      setStatus(null);
+      setSuccess("2FA has been reset.");
+      setIsMFAactive(false);
       setQrCode("");
-      setMessage("2FA reset successfully");
-    } catch (error) {
-      console.error("Error resetting 2FA:", error);
-      setMessage("Error resetting 2FA");
+      setCode("");
+      setError("");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to reset 2FA");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white px-4">
-      <div className="bg-gray-800 p-10 my-10 rounded-lg shadow-lg w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">
-          Two-Factor Authentication
-        </h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
+      <h1 className="text-2xl font-bold mb-4">Two-Factor Authentication</h1>
 
-        {status && (
-          <div className="mb-4 text-gray-300">
-            <p className="text-sm">Status: {status.message}</p>
-            <p className="text-sm">Username: {status.username}</p>
-            <p className="text-sm">
-              MFA Active: {status.isMFAactive ? "Yes" : "No"}
-            </p>
-          </div>
-        )}
-
-        {!status && (
+      {isMFAactive ? (
+        <>
+          <p className="text-green-600 font-semibold mb-4">
+            2FA is already enabled ✅
+          </p>
           <button
-            onClick={checkStatus}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-          >
-            Check Status
-          </button>
-        )}
-
-        {status && !status.isMFAactive && (
-          <button
-            onClick={setup2FA}
-            className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-200 mt-4"
-          >
-            Setup 2FA
-          </button>
-        )}
-
-        {qrCode && (
-          <div className="mt-4 flex flex-col items-center">
-            <img
-              src={qrCode || "/placeholder.svg"}
-              alt="QR Code"
-              className="rounded-lg shadow-md"
-            />
-            <p className="text-sm text-gray-400 mt-2 text-center">
-              Scan this QR code with your authenticator app
-            </p>
-          </div>
-        )}
-
-        {qrCode && (
-          <div className="mt-4">
-            <input
-              type="text"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Enter 2FA token"
-              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              onClick={verify2FA}
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200 mt-2"
-            >
-              Verify 2FA
-            </button>
-          </div>
-        )}
-
-        {status && status.isMFAactive && (
-          <button
-            onClick={reset2FA}
-            className="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-200 mt-4"
+            onClick={handleReset2FA}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 mb-4"
           >
             Reset 2FA
           </button>
-        )}
+        </>
+      ) : (
+        <>
+          {!qrCode ? (
+            <button
+              onClick={handleEnable2FA}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Enable 2FA
+            </button>
+          ) : (
+            <>
+              <p className="mb-2">
+                Scan the QR code below in your Authenticator app:
+              </p>
+              <img src={qrCode} alt="QR Code" className="mb-4 w-56" />
 
-        {message && (
-          <p className="mt-4 text-sm text-center text-gray-400">{message}</p>
-        )}
-      </div>
+              <form onSubmit={handleVerifyCode} className="w-full max-w-sm">
+                <label className="block mb-1 text-gray-700">
+                  Enter 6-digit code:
+                </label>
+                <input
+                  type="text"
+                  maxLength="6"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="w-full border border-gray-300 p-2 rounded mb-3"
+                  required
+                />
+                {error && <p className="text-red-500 mb-2">{error}</p>}
+                {success && <p className="text-green-500 mb-2">{success}</p>}
+                <button
+                  type="submit"
+                  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
+                >
+                  Verify Code
+                </button>
+              </form>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 };

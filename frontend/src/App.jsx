@@ -17,15 +17,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />}></Route>
           <Route path="/signup" element={<Signup />}></Route>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                {" "}
-                <Home />{" "}
-              </ProtectedRoute>
-            }
-          ></Route>
+          <Route path="/" element={<Home />}></Route>
           <Route path="/2fa" element={<TwoFA />}></Route>
           <Route path="/dashboard" element={<Dashboard />}></Route>
         </Routes>

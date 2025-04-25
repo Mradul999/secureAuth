@@ -22,16 +22,19 @@ const Login = () => {
         {
           username,
           password,
+        },
+        {
           withCredentials: true,
         }
       );
 
       if (response.status === 200) {
-        sessionStorage.setItem("user", response.data.user);
+        console.log("Login successful, response:", response.data);
         alert("Login successful!");
         navigate("/");
       }
     } catch (error) {
+      console.error("Login error:", error);
       if (error.response) {
         if (error.response.status === 404) {
           alert("User not registered");
@@ -45,63 +48,45 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
-      <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-lg p-8">
-        <h2 className="text-3xl font-extrabold text-center text-white mb-6">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">
           Login
         </h2>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="relative">
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-2">Username</label>
             <input
               type="text"
-              name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400"
-              placeholder="Username"
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
-
-          <div className="relative">
+          <div className="mb-6">
+            <label className="block text-gray-300 mb-2">Password</label>
             <input
               type={showPassword ? "text" : "password"}
-              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400"
-              placeholder="Password"
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-sm text-blue-400 hover:text-blue-300 focus:outline-none"
+              className="mt-2 text-sm text-blue-400 hover:text-blue-300"
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? "Hide Password" : "Show Password"}
             </button>
           </div>
-
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-all duration-300"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
           >
             Login
           </button>
-
-          <p className="text-center text-sm text-gray-400">
-            Don't have an account?{" "}
-            <a
-              href="/signup"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/signup");
-              }}
-              className="text-blue-400 hover:underline"
-            >
-              Sign Up
-            </a>
-          </p>
         </form>
       </div>
     </div>

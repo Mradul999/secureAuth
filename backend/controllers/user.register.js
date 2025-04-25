@@ -1,12 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import speakeasy from "speakeasy";
 import jwt from "jsonwebtoken";
+import speakeasy from "speakeasy";
 import qrcode from "qrcode";
-
-import dotenv from "dotenv";
-
-dotenv.config();
 
 export const register = async (req, res) => {
   try {
@@ -41,31 +37,43 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  console.log("Authenticated user:", req.user);
-  res.status(200).json({
-    message: "user logged in successfully",
-    username: req.user.username,
-    isMFAactive: req.user.isMFAactive,
-  });
+  try {
+    console.log("Login controller called");
+    console.log("Authenticated user:", req.user);
+    console.log("Session:", req.session);
+    
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication failed" });
+    }
+
+    // The user is already authenticated by passport
+    res.status(200).json({
+      message: "User login successfully",
+      username: req.user.username,
+      isMFAactive: req.user.isMFAactive,
+      user: req.user
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 export const getStatus = async (req, res) => {
   try {
-    // console.log("JWT decoded data=>", req.user);
-    const { username } = req.body;
+    console.log("getStatus controller called");
+    console.log("user",req.user);
 
-    // Get user from database using username from JWT
-    const user = await User.findOne({ username: req.user.username });
-    if (!user) {
-      console.error("User not found in database");
-      return res.status(401).json({ message: "User not found" });
+    if (req.user) {
+      return res.status(200).json({
+        message: "User is logged in",
+        username: req.user.username,
+        isMFAactive: req.user.isMFAactive,
+      });
+    } else {
+      console.error("Unauthorized access attempt - No user in request");
+      return res.status(401).json({ message: "Unauthorized user" });
     }
-
-    return res.status(200).json({
-      message: "User is logged in",
-      username: user.username,
-      isMFAactive: user.isMFAactive,
-    });
   } catch (error) {
     console.error("An error occurred in getStatus controller:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -82,13 +90,9 @@ export const logout = async (req, res) => {
   });
 };
 
-// What is Speakeasy?
-// Speakeasy is a Node.js library used for implementing Two-Factor Authentication (2FA)
-//  and One-Time Passwords (OTP) in your application.
-
 export const setup2fa = async (req, res) => {
   try {
-    console.log("the requested user is :", req.user);
+    console.log(req.user);
     const user = req.user;
 
     //generating a secret using speakeasy
@@ -124,29 +128,35 @@ export const setup2fa = async (req, res) => {
 };
 // here we will verify the genetated otp
 export const verify2fa = async (req, res) => {
-  const { token } = req.body;
-  const user = req.user;
-  //here we are veirfying the token coming from the body with the secret stored in the databse
-  const verified = speakeasy.totp.verify({
-    secret: user.twoFactorSecret,
-    encoding: "base32",
-    token,
-  });
-  //if verification done successfully we will assgin the user a jwt
-  //  which will be used further for accessing the routes
-  // also an expiry time for the token
-  if (verified) {
-    user.isMFAactive = true;
-    const jwttoken = jwt.sign(
-      { username: user.username },
-      process.env.jwt_secret,
-      { expiresIn: "1hr" }
-    );
-    await user.save();
+  try {
+    const { code } = req.body;
+    console.log("code from frontend ", code);
+    const user = req.user;
 
-    res.status(200).json({ message: "2fa successfull", token: jwttoken });
-  } else {
-    res.status(400).json({ message: "Invalid 2fa token" });
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: "base32",
+      code,
+    });
+
+    console.log("secret ", user.twoFactorSecret);
+
+    if (verified) {
+      user.isMFAactive = true;
+      const jwttoken = jwt.sign(
+        { username: user.username },
+        process.env.jwt_secret,
+        { expiresIn: "1hr" }
+      );
+      await user.save();
+
+      res.status(200).json({ message: "2fa successfull", code: jwttoken });
+    } else {
+      res.status(400).json({ message: "Invalid 2fa code" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
