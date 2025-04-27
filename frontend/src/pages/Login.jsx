@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import { NavLink } from "react-router-dom";
+
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +32,7 @@ const Login = () => {
 
       if (response.status === 200) {
         console.log("Login successful, response:", response.data);
+        sessionStorage.setItem("user", true);
         alert("Login successful!");
         navigate("/");
       }
@@ -83,10 +86,21 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
+            className="w-full mb-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
           >
             Login
           </button>
+
+          <NavLink to="/signup">
+            <span className=" text-white text-sm  ">
+              {" "}
+              Not registed yet{" "}
+              <span className="font-bold cursor-pointer hover:text-blue-400 transition ">
+                {" "}
+                Signup
+              </span>
+            </span>
+          </NavLink>
         </form>
       </div>
     </div>

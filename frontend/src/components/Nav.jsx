@@ -1,7 +1,5 @@
 import React from "react";
 
-
-
 import { useNavigate } from "react-router-dom";
 
 const Nav = () => {
@@ -12,13 +10,10 @@ const Nav = () => {
   const handleLogout = () => {
     sessionStorage.removeItem("user");
 
-    navigate("/");
+    navigate("/login");
 
     try {
-      
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   };
 
   return (

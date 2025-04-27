@@ -41,7 +41,7 @@ export const login = async (req, res) => {
     console.log("Login controller called");
     console.log("Authenticated user:", req.user);
     console.log("Session:", req.session);
-    
+
     if (!req.user) {
       return res.status(401).json({ message: "Authentication failed" });
     }
@@ -51,7 +51,7 @@ export const login = async (req, res) => {
       message: "User login successfully",
       username: req.user.username,
       isMFAactive: req.user.isMFAactive,
-      user: req.user
+      user: req.user,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -62,7 +62,7 @@ export const login = async (req, res) => {
 export const getStatus = async (req, res) => {
   try {
     console.log("getStatus controller called");
-    console.log("user",req.user);
+    console.log("user", req.user);
 
     if (req.user) {
       return res.status(200).json({
@@ -137,20 +137,17 @@ export const verify2fa = async (req, res) => {
       secret: user.twoFactorSecret,
       encoding: "base32",
       code,
+      window: 1,
     });
 
     console.log("secret ", user.twoFactorSecret);
 
     if (verified) {
       user.isMFAactive = true;
-      const jwttoken = jwt.sign(
-        { username: user.username },
-        process.env.jwt_secret,
-        { expiresIn: "1hr" }
-      );
+
       await user.save();
 
-      res.status(200).json({ message: "2fa successfull", code: jwttoken });
+      res.status(200).json({ message: "2fa successfull" });
     } else {
       res.status(400).json({ message: "Invalid 2fa code" });
     }
