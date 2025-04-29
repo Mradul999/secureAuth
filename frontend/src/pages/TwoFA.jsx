@@ -14,9 +14,12 @@ const TwoFA = () => {
 
   const fetchStatus = async () => {
     try {
-      const res = await axios.get(`http://localhost:7000/api/auth/status`, {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/auth/status`,
+        {
+          withCredentials: true,
+        }
+      );
       setIsMFAactive(res.data.isMFAactive);
     } catch (err) {
       console.error(err);
@@ -77,7 +80,7 @@ const TwoFA = () => {
         { withCredentials: true }
       );
       setSuccess("2FA has been reset.");
-      setIsMFAactive(false)
+      setIsMFAactive(false);
       setQrCode("");
       setToken("");
       setError("");
