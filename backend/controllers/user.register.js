@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 export const register = async (req, res) => {
   try {
     //extracting the username and password from the request body
@@ -38,9 +41,9 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log("Login controller called");
-    console.log("Authenticated user:", req.user);
-    console.log("Session:", req.session);
+    // console.log("Login controller called");
+    // console.log("Authenticated user:", req.user);
+    // console.log("Session:", req.session);
 
     if (!req.user) {
       return res.status(401).json({ message: "Authentication failed" });
@@ -61,8 +64,8 @@ export const login = async (req, res) => {
 
 export const getStatus = async (req, res) => {
   try {
-    console.log("getStatus controller called");
-    console.log("user", req.user);
+    // console.log("getStatus controller called");
+    // console.log("user", req.user);
 
     if (req.user) {
       return res.status(200).json({
@@ -92,15 +95,16 @@ export const logout = async (req, res) => {
 
 export const setup2fa = async (req, res) => {
   try {
-    console.log(req.user);
+    // console.log(req.user);
     const user = req.user;
 
     //generating a secret using speakeasy
     var secret = speakeasy.generateSecret();
 
-    console.log(secret);
+    // console.log(secret);
     // storing the secret in the database for later use
     user.twoFactorSecret = secret.base32;
+    user.isMFAactive = true;
 
     //saving changes in the database
     await user.save();
@@ -129,37 +133,45 @@ export const setup2fa = async (req, res) => {
 // here we will verify the genetated otp
 export const verify2fa = async (req, res) => {
   try {
-    const { code } = req.body;
-    console.log("code from frontend ", code);
+    const { token } = req.body;
     const user = req.user;
+
+    if (!req.user || !req.user.twoFactorSecret) {
+      console.error("No user or 2FA secret found");
+      return res.status(400).json({ message: "2FA not properly set up" });
+    }
 
     const verified = speakeasy.totp.verify({
       secret: user.twoFactorSecret,
       encoding: "base32",
-      code,
-      window: 1,
+      token,
     });
 
-    console.log("secret ", user.twoFactorSecret);
+    // console.log("Verification result:", verified);
 
     if (verified) {
-      user.isMFAactive = true;
-
-      await user.save();
-
-      res.status(200).json({ message: "2fa successfull" });
+      // console.log("checking req.user ", req.user);
+      const token = jwt.sign(
+        { username: user.username },
+        process.env.jwt_secret,
+        { expiresIn: "1hr" }
+      );
+      // console.log("2FA successfully activated for user:", req.user.username);
+      res.status(200).json({ message: "2FA code verified successfully", token });
     } else {
-      res.status(400).json({ message: "Invalid 2fa code" });
+      // console.log("Verification failed - Invalid code");
+      res.status(400).json({ message: "Invalid 2FA code" });
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
+    console.error("2FA verification error:", error);
+    res.status(500).json({ message: "Error verifying 2FA code" });
   }
 };
 
 export const reset2fa = async (req, res) => {
   try {
     const user = req.user;
+    console.log("user is", user);
 
     user.twoFactorSecret = "";
     user.isMFAactive = false;

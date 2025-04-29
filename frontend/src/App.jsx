@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import TwoFA from "./pages/TwoFA.jsx";
 import Nav from "./components/Nav.jsx";
+import FinalPage from "./pages/FinalPage.jsx";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/" element={<Home />}></Route>
           <Route path="/2fa" element={<TwoFA />}></Route>
           <Route path="/dashboard" element={<Dashboard />}></Route>
+          {/* <Route path="/final" element={<FinalPage/>}></Route> */}
         </Routes>
       </BrowserRouter>
     </div>

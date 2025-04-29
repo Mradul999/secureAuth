@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 const TwoFA = () => {
   const [isMFAactive, setIsMFAactive] = useState(false);
   const [qrCode, setQrCode] = useState("");
-  const [code, setCode] = useState("");
-  console.log(code);
+  const [token, setToken] = useState("");
+  console.log(token);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -44,23 +44,29 @@ const TwoFA = () => {
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await axios.post(
+      // console.log("Verifying 2FA with token:", token);
+      const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/verify2fa`,
-        { code },
+        { token },
         { withCredentials: true }
       );
-      if (res.data.success) {
-        setSuccess("2FA successfully enabled!");
-        setIsMFAactive(true);
-        setQrCode("");
-        setCode("");
+
+      if (response.status === 200) {
+        // console.log("2FA verification successful:", response.data);
+        setSuccess("2FA verification successful");
         setError("");
-      } else {
-        setError("Invalid code");
+        // Update user status in session storage
+        // const userData = JSON.parse(sessionStorage.getItem("user"));
+        // userData.isMFAactive = true;
+        // sessionStorage.setItem("user", JSON.stringify(userData));
       }
-    } catch (err) {
-      setError(err.response?.data?.message || "Verification failed");
+    } catch (error) {
+      console.error("2FA verification error:", error);
+      if (error.response.status === 400) {
+        alert("Invalid code");
+      }
     }
   };
 
@@ -71,9 +77,9 @@ const TwoFA = () => {
         { withCredentials: true }
       );
       setSuccess("2FA has been reset.");
-      setIsMFAactive(false);
+      setIsMFAactive(false)
       setQrCode("");
-      setCode("");
+      setToken("");
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to reset 2FA");
@@ -108,19 +114,19 @@ const TwoFA = () => {
           ) : (
             <>
               <p className="mb-2">
-                Scan the QR code below in your Authenticator app:
+                Scan the QR token below in your Authenticator app:
               </p>
               <img src={qrCode} alt="QR Code" className="mb-4 w-56" />
 
               <form onSubmit={handleVerifyCode} className="w-full max-w-sm">
                 <label className="block mb-1 text-gray-700">
-                  Enter 6-digit code:
+                  Enter 6-digit token:
                 </label>
                 <input
                   type="text"
                   maxLength="6"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
                   className="w-full border border-gray-300 p-2 rounded mb-3"
                   required
                 />

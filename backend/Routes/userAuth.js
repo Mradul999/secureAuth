@@ -13,15 +13,6 @@ import { routeProtection } from "../middlewares/routeProtection.js";
 
 const router = Router();
 
-// Add middleware to log authentication state
-router.use((req, res, next) => {
-  console.log("=== Route Authentication Check ===");
-  console.log("req.isAuthenticated():", req.isAuthenticated());
-  console.log("req.user:", req.user);
-  console.log("req.session:", req.session);
-  next();
-});
-
 router.post("/register", register);
 
 // Using passport.authenticate with session
@@ -38,7 +29,7 @@ router.post(
 router.get(
   "/status",
   (req, res, next) => {
-    console.log("Status route - isAuthenticated:", req.isAuthenticated());
+    // console.log("Status route - isAuthenticated:", req.isAuthenticated());
     if (req.isAuthenticated()) {
       return next();
     }
