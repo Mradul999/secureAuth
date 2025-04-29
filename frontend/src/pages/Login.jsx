@@ -20,7 +20,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        `https://secureauth-7fi4.onrender.com/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
         {
           username,
           password,

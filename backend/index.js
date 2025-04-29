@@ -26,9 +26,8 @@ app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+
     credentials: true,
-    allowedHeaders: ["Access-Control-Allow-Origin"],
   })
 );
 
@@ -42,8 +41,7 @@ app.use(
     cookie: {
       maxAge: 60 * 60 * 1000,
 
-      sameSite: "none",   
-      secure: true
+      sameSite: "lax",
     },
   })
 );
